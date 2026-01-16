@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from 'react';
 import { FlatList, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PostCard from '../components/PostCard';
@@ -7,9 +8,18 @@ import { Theme } from '../theme/designSystem';
 export default function FavoritesScreen() {
   const { feedItems, users, likedPosts, toggleLike } = useAppState();
 
-  const favoritePosts = (feedItems || []).filter((item) => likedPosts.includes(item.itemId));
+  const userMap = useMemo(() => {
+    return (users || []).reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+  }, [users]);
 
-  const renderEmpty = () => (
+  const favoritePosts = useMemo(() => 
+    (feedItems || []).filter((item) => likedPosts.includes(item.itemId)),
+  [feedItems, likedPosts]);
+
+  const renderEmpty = useCallback(() => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconCircle}>
         <Text style={styles.emptyEmoji}>✨</Text>
@@ -17,7 +27,19 @@ export default function FavoritesScreen() {
       <Text style={styles.emptyText}>No Favorites Yet</Text>
       <Text style={styles.emptySubtext}>Your favorite posts will appear here once you tap the heart.</Text>
     </View>
-  );
+  ), []);
+
+  const renderItem = useCallback(({ item }) => {
+    const user = userMap[item.authorId];
+    return (
+      <PostCard
+        post={item}
+        user={user}
+        onLike={toggleLike}
+        isLiked={true}
+      />
+    );
+  }, [userMap, toggleLike]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -29,20 +51,12 @@ export default function FavoritesScreen() {
       <FlatList
         data={favoritePosts}
         keyExtractor={(item) => item.itemId.toString()}
-        renderItem={({ item }) => {
-          const user = users.find((u) => u.id === item.authorId);
-          return (
-            <PostCard
-              post={item}
-              user={user}
-              onLike={toggleLike}
-              isLiked={true}
-            />
-          );
-        }}
+        renderItem={renderItem}
         ListEmptyComponent={renderEmpty}
         contentContainerStyle={[styles.listContent, favoritePosts.length === 0 ? { flex: 1 } : null]}
         showsVerticalScrollIndicator={false}
+        initialNumToRender={10}
+        windowSize={5}
       />
     </SafeAreaView>
   );

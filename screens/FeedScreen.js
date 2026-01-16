@@ -1,4 +1,5 @@
 import { Bell, Search } from 'lucide-react-native';
+import { useCallback, useMemo } from 'react';
 import { ActivityIndicator, FlatList, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PostCard from '../components/PostCard';
@@ -9,7 +10,18 @@ import { Theme } from '../theme/designSystem';
 export default function FeedScreen({ navigation }) {
   const { feedItems, users, loading, toggleLike, likedPosts } = useAppState();
 
-  const renderHeader = () => (
+  const userMap = useMemo(() => {
+    return (users || []).reduce((acc, user) => {
+      acc[user.id] = user;
+      return acc;
+    }, {});
+  }, [users]);
+
+  const handleStoryPress = useCallback((user) => {
+    navigation.navigate('StoryView', { user });
+  }, [navigation]);
+
+  const renderHeader = useMemo(() => (
     <>
       <View style={styles.headerTitleContainer}>
         <View style={styles.headerLeft}>
@@ -27,9 +39,21 @@ export default function FeedScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-      <StoryBar users={users} onStoryPress={(user) => navigation.navigate('StoryView', { user })} />
+      <StoryBar users={users} onStoryPress={handleStoryPress} />
     </>
-  );
+  ), [users, handleStoryPress]);
+
+  const renderItem = useCallback(({ item }) => {
+    const user = userMap[item.authorId];
+    return (
+      <PostCard
+        post={item}
+        user={user}
+        onLike={toggleLike}
+        isLiked={likedPosts.includes(item.itemId)}
+      />
+    );
+  }, [userMap, toggleLike, likedPosts]);
 
   if (loading) {
     return (
@@ -46,20 +70,13 @@ export default function FeedScreen({ navigation }) {
       <FlatList
         data={feedItems}
         keyExtractor={(item) => item.itemId.toString()}
-        renderItem={({ item }) => {
-          const user = users.find((u) => u.id === item.authorId);
-          return (
-            <PostCard
-              post={item}
-              user={user}
-              onLike={toggleLike}
-              isLiked={likedPosts.includes(item.itemId)}
-            />
-          );
-        }}
+        renderItem={renderItem}
         ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        initialNumToRender={5}
+        maxToRenderPerBatch={10}
+        windowSize={10}
       />
     </SafeAreaView>
   );

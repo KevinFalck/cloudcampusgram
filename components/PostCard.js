@@ -1,12 +1,13 @@
 import { useNavigation } from '@react-navigation/native';
 import { Image as ExpoImage } from 'expo-image';
 import { Heart, MessageCircle, MoreHorizontal, Share2 } from 'lucide-react-native';
+import { memo } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../theme/designSystem';
 
 const { width } = Dimensions.get('window');
 
-export default function PostCard({ post, user, onLike, isLiked }) {
+const PostCard = memo(({ post, user, onLike, isLiked }) => {
   const navigation = useNavigation();
   
   return (
@@ -75,7 +76,9 @@ export default function PostCard({ post, user, onLike, isLiked }) {
       </View>
     </View>
   );
-}
+});
+
+export default PostCard;
 
 const styles = StyleSheet.create({
   container: {
