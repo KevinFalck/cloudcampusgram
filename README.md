@@ -1,4 +1,4 @@
-# 🌌 CloudCampusGram — Pro 2026 Edition
+# 🌌 CloudCampusGram — Prototype
 
 [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
@@ -61,4 +61,4 @@ Coming soon... (Stay tuned for the visual showcase)
 
 ---
 
-Developed with ❤️ by **Kevin Falck** — Shaping the future of social experience.
+Developed by **Kevin Falck** — Just a prototype for cloudcampus school.
